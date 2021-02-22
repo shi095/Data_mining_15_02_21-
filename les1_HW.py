@@ -67,3 +67,6 @@ if __name__ == "__main__":
     save_path_categories = get_save_path("categories")
     cat_parser = CategoriesParser(cat_url, url, save_path_categories)
     cat_parser.run()
+
+
+# Разобрано и проанализировано ваше решение. Немного скорректировано.
