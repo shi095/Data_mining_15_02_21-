@@ -1,2 +1,2 @@
 from scrapy.clawler import ClawlerProcess
-from scrapy.settings import Settings
+from scrapy.settings import
