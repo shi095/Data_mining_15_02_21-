@@ -1,5 +1,5 @@
 import scrapy
-
+import string
 
 class AutoyoulaSpider(scrapy.Spider):
     name = 'autoyoula'
@@ -23,8 +23,8 @@ class AutoyoulaSpider(scrapy.Spider):
         for item in response.css('.AdvertCard_specs__2FEHc .AdvertSpecs_row__ljPcX')
         ],
         'description': lambda response: response.css('.AdvertCard_descriptionInner__KnuRi::text').extract(),
-        'author_url':"",
-        'phone':""
+        'author':"",
+       # 'phone':""  в разработке файлы 1_1 и 1_2 получилось вытащить номер телефона, обдумываю логику поиска и загрузки
 
 
     }
@@ -49,7 +49,7 @@ class AutoyoulaSpider(scrapy.Spider):
                                     self.car_parse)
 
 # Обработан урок 4. 09.03.21 будет дополнено выполненным домашним заданием
-    def car_parse(self,response):
+    def car_parse(self, response):
         print(1)
  #       for key, selector in self.data_question.items():
  #           try:
