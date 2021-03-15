@@ -1,5 +1,9 @@
 import scrapy
 import pymongo
+import re
+import base64
+
+
 
 class AutoyoulaSpider(scrapy.Spider):
     name = 'autoyoula'
@@ -23,8 +27,37 @@ class AutoyoulaSpider(scrapy.Spider):
         for item in response.css('div.AdvertCard_specs__2FEHc .AdvertSpecs_row__ljPcX')
         ],
         'description': lambda response: response.css('.AdvertCard_descriptionInner__KnuRi::text').extract_first(),
-
+        "author": lambda response: AutoyoulaSpider.get_author(response),
+        "phone": lambda response: AutoyoulaSpider.get_phone(response),
     }
+
+    @staticmethod
+    def get_author(response):
+        elem = "window.transitState = decodeURIComponent"
+        for script in response.css("script"):
+            try:
+                if elem in script.css("::text").get():
+                    pattern = re.compile(r"youlaId%22%2C%22([a-zA-Z|\d]+)%22%2C%22avatar")
+                    result = re.findall(pattern, script.css("::text").get())
+                    return response.urljoin(f"/user/{result[0]}") if result else None
+            except TypeError:
+                pass
+
+    @staticmethod
+    def get_phone(response):
+        elem = "window.transitState = decodeURIComponent"
+        for script in response.css("script"):
+            try:
+                if elem in script.css("::text").get():
+                    pattern = re.compile(r"phone%22%2C%22([a-zA-Z|\d]+)%3D%3D%22%2C%22time")
+                    result = re.findall(pattern, script.css("::text").get())
+                    correct_code = f"{result[0]}=="
+                    decoded = base64.b64decode(correct_code)
+                    decoded_phone = base64.b64decode(decoded)
+                    result = bytes.decode(decoded_phone)
+                    return result if result else None
+            except TypeError:
+                pass
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -50,8 +83,9 @@ class AutoyoulaSpider(scrapy.Spider):
                                     self._css_selectors["car"],
                                     self.car_parse)
 
-# Обработан урок 4. 09.03.21 будет дополнено выполненным домашним заданием
+
     def car_parse(self, response):
+
         collection_autoyoula= {}
         for key, selector in self.data_question.items():
             try:
