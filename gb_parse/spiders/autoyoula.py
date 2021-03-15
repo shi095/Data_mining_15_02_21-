@@ -1,5 +1,5 @@
 import scrapy
-import string
+import pymongo
 
 class AutoyoulaSpider(scrapy.Spider):
     name = 'autoyoula'
@@ -13,21 +13,23 @@ class AutoyoulaSpider(scrapy.Spider):
         'car':".SerpSnippet_titleWrapper__38bZM a.SerpSnippet_name__3F7Yu",
     }
     data_question = {
-        'title': lambda response: response.css(".AdvertCard_advertTitle__1S1Ak::text").extract_first(),
-        'photos': lambda response: [item for item in response.css(".PhotoGallery_photo__36e_r img::attr(src)").extract()],
+        'title': lambda response: response.css("div.AdvertCard_advertTitle__1S1Ak::text").extract_first(),
+        'photos': lambda response: [item for item in response.css("figure.PhotoGallery_photo__36e_r img::attr(src)").extract()],
         'characteristics':lambda response:[
             {'name': item.css('.AdvertSpecs_label__2JHnS::text').get(),
              'value': item.css('.AdvertSpecs_data__xK2Qx::text').get()
                       or item.css('.AdvertSpecs_data__xK2Qx a::text').get()
              }
-        for item in response.css('.AdvertCard_specs__2FEHc .AdvertSpecs_row__ljPcX')
+        for item in response.css('div.AdvertCard_specs__2FEHc .AdvertSpecs_row__ljPcX')
         ],
-        'description': lambda response: response.css('.AdvertCard_descriptionInner__KnuRi::text').extract(),
-        'author':"",
-       # 'phone':""  в разработке файлы 1_1 и 1_2 получилось вытащить номер телефона, обдумываю логику поиска и загрузки
-
+        'description': lambda response: response.css('.AdvertCard_descriptionInner__KnuRi::text').extract_first(),
 
     }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.db_client = pymongo.MongoClient()
+
     def _get_follow(self, response, select_str, callback, **kwargs):
         for a in response.css(select_str):
             link = a.attrib.get("href")
@@ -50,12 +52,12 @@ class AutoyoulaSpider(scrapy.Spider):
 
 # Обработан урок 4. 09.03.21 будет дополнено выполненным домашним заданием
     def car_parse(self, response):
-        print(1)
- #       for key, selector in self.data_question.items():
- #           try:
-#                data[key] = selector(response)
-#            except (ValueError, AttributeError):
-#                continue
-# дописать!!!!
+        collection_autoyoula= {}
+        for key, selector in self.data_question.items():
+            try:
+                collection_autoyoula[key] = selector(response)
+            except (ValueError, AttributeError):
+                continue
+        result = self.db_client["autoyoula_DB"][self.name].insert_one(collection_autoyoula)
 
 
