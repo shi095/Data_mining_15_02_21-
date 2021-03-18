@@ -6,7 +6,21 @@
 import scrapy
 
 
+
 class GbParseItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass
+
+
+class GbAutoYoulaItem(scrapy.Item):
+    url = scrapy.Field()
+    title = scrapy.Field()
+    photos = scrapy.Field()
+    characteristics = scrapy.Field()
+    description = scrapy.Field()
+    author = scrapy.Field()
+    phone = scrapy.Field()
+
+
+
