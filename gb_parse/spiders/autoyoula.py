@@ -30,7 +30,6 @@ class AutoyoulaSpider(scrapy.Spider):
         'author': "//script[contains(text(),'youlaId')]",
         'phone': "//script[contains(text(),'phone')]",
 
-
     }
 
     def _get_follow(self, response, select_str, callback, **kwargs):
